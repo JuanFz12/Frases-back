@@ -29,7 +29,7 @@ export class PhrasesService {
       });
       const totalPhrases = await this.prismaService.phrase.count();
       return {
-        phrases: phrases.map(Phrase.toJson),
+        phrases: phrases.map(phrase => Phrase.toJson(phrase)),
         pagination: {
           page: paginationDto.page,
           limit: paginationDto.limit,
@@ -73,6 +73,20 @@ export class PhrasesService {
         where: { id },
       });
       return Phrase.toJson(phrase);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async findRandom() {
+    try {
+      const phrases = await this.prismaService.phrase.findMany();
+      if (phrases.length === 0) {
+        throw new NotFoundException('No phrases found');
+      }
+      const randomIndex = Math.floor(Math.random() * phrases.length);
+      const { updatedAt, ...restPhrase } = Phrase.toJson(phrases[randomIndex])
+      return restPhrase;
     } catch (error) {
       throw error;
     }

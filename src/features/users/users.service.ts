@@ -60,10 +60,11 @@ export class UsersService {
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     try {
+      const { password, ...rest } = updateUserDto;
       const user = await this.prismaService.user.update({
         where: { id },
-        data: { ...updateUserDto }
-        
+        data: { ...rest, ...(password && { password: bcrypt.hashSync(password, 10) }) },
+        omit: { password: true, createdAt: true, updatedAt: true }
       });
       return User.toJson(user);
     } catch (error) {
